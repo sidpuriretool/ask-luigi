@@ -1,5 +1,6 @@
 import { Codex, Thread } from "@openai/codex-sdk";
 import path from "path";
+import fs from "fs";
 
 // Module-level state
 let client: Codex | null = null;
@@ -10,6 +11,10 @@ function getClient(): Codex {
   if (!client) {
     // Set CODEX_HOME like html-campaign does
     const codexHome = path.join(process.cwd(), ".codex");
+    // Create the directory if it doesn't exist
+    if (!fs.existsSync(codexHome)) {
+      fs.mkdirSync(codexHome, { recursive: true });
+    }
     process.env.CODEX_HOME = codexHome;
     // Use same pattern as html-campaign: new Codex() with no config
     client = new Codex();
