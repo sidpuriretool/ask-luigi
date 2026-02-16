@@ -178,6 +178,8 @@ export async function* runCodex(prompt: string): AsyncGenerator<CodexEvent> {
     const codex = getClient();
     const guardedPrompt = buildGuardedPrompt(prompt);
     const runStartedAt = Date.now();
+    let lastActivity: string | null = null;
+    const statusLineEmittedFor = new Set<string>();
     yield { type: "plan", content: "Starting Codex run...\n" };
 
     // Recycle long-lived threads to keep run latency predictable.
@@ -214,7 +216,10 @@ export async function* runCodex(prompt: string): AsyncGenerator<CodexEvent> {
 
       if (next.kind === "heartbeat") {
         const elapsedSeconds = Math.floor((Date.now() - runStartedAt) / 1000);
-        yield { type: "plan", content: `Still working... (${elapsedSeconds}s)\n` };
+        const heartbeatLine = lastActivity
+          ? `Still working... (${elapsedSeconds}s). Last: ${lastActivity}\n`
+          : `Still working... (${elapsedSeconds}s)\n`;
+        yield { type: "plan", content: heartbeatLine };
         continue;
       }
 
@@ -223,10 +228,16 @@ export async function* runCodex(prompt: string): AsyncGenerator<CodexEvent> {
         type: string;
         message?: string;
         item?: {
+          id?: string;
           type?: string;
           text?: string;
           content?: string;
           changes?: { path: string; kind: string }[];
+          query?: string;
+          command?: string;
+          tool?: string;
+          server?: string;
+          items?: { text: string; completed: boolean }[];
         };
       };
 
@@ -261,18 +272,58 @@ export async function* runCodex(prompt: string): AsyncGenerator<CodexEvent> {
         (event.type === "item.started" || event.type === "item.updated") &&
         event.item
       ) {
-        const item = event.item as {
-          type?: string;
-          text?: string;
-          content?: string;
-        };
-        const content = item.text ?? item.content ?? "";
-        if (!content) continue;
+        const item = event.item;
+        const itemId = item.id ?? "";
 
-        if (item.type === "reasoning") {
-          yield { type: "plan", content };
-        } else if (item.type === "agent_message") {
-          yield { type: "message", content };
+        // Live status lines (one per item id for tool-like items, every update for todo_list)
+        if (item.type === "web_search") {
+          if (itemId && !statusLineEmittedFor.has(itemId)) {
+            statusLineEmittedFor.add(itemId);
+            const query = (item as { query?: string }).query;
+            const line = query
+              ? `Searching the web: "${query.length > 40 ? query.slice(0, 40) + "…" : query}"...\n`
+              : "Searching the web...\n";
+            lastActivity = "Searching the web";
+            yield { type: "plan", content: line };
+          }
+        } else if (item.type === "command_execution") {
+          if (itemId && !statusLineEmittedFor.has(itemId)) {
+            statusLineEmittedFor.add(itemId);
+            const cmd = (item as { command?: string }).command;
+            const line =
+              cmd && cmd.length <= 60
+                ? `Running command: ${cmd}\n`
+                : "Running command...\n";
+            lastActivity = "Running command";
+            yield { type: "plan", content: line };
+          }
+        } else if (item.type === "mcp_tool_call") {
+          if (itemId && !statusLineEmittedFor.has(itemId)) {
+            statusLineEmittedFor.add(itemId);
+            const tool = (item as { tool?: string }).tool ?? "tool";
+            lastActivity = `Using tool: ${tool}`;
+            yield { type: "plan", content: `Using tool: ${tool}...\n` };
+          }
+        } else if (item.type === "todo_list") {
+          const items = (item as { items?: { text: string; completed: boolean }[] }).items ?? [];
+          const total = items.length;
+          const completed = items.filter((i) => i.completed).length;
+          const line =
+            total > 0
+              ? `Planning: ${completed} of ${total} steps\n`
+              : "Planning...\n";
+          lastActivity = total > 0 ? `Planning: ${total} steps` : "Planning";
+          yield { type: "plan", content: line };
+        }
+
+        // Reasoning and agent_message (streamed text)
+        const content = item.text ?? item.content ?? "";
+        if (content) {
+          if (item.type === "reasoning") {
+            yield { type: "plan", content };
+          } else if (item.type === "agent_message") {
+            yield { type: "message", content };
+          }
         }
       }
 

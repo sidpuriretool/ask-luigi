@@ -39,7 +39,7 @@ export const headphones: Headphone[] = [
     originalPrice: 429,
     description: "Plush fit and strong noise reduction, especially for long flights.",
     longDescription:
-      "Bose's most advanced QuietComfort option pairs adjustable active noise cancelling with an around-ear cushioned fit and USB-C charging for daily listening.",
+      "The QuietComfort Ultra is the QuietComfort line's CustomTune-calibrated model, using in-ear measurements to tailor sound and noise cancellation, with multiple ANC modes for travel or focus. If the QC45 is your baseline, CustomTune is the defining upgrade, and RTINGS finds its noise isolation edges out Sony's WH-1000XM5. Battery life is rated at 24 hours (18 with Immersive Audio), with RTINGS measuring about 29 hours in real use.",
     features: [
       "Soft ear cushions that stay comfortable for long sessions.",
       "Class-leading wind and cabin noise suppression.",
