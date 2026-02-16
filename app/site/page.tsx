@@ -3,11 +3,16 @@ import { HeadphoneCard } from "@/components/headphone-card";
 
 export default function SitePage() {
   return (
-    <div className="min-h-screen bg-gray-50">
-      <header className="bg-white border-b border-gray-200">
+    <div className="min-h-screen bg-slate-950 text-slate-100 bg-[radial-gradient(circle_at_top,_rgba(34,211,238,0.12),_transparent_55%)]">
+      <header className="bg-slate-950/80 border-b border-slate-800 backdrop-blur">
         <div className="max-w-7xl mx-auto px-4 py-8">
-          <h1 className="text-5xl font-bold text-purple-700">askLuigi</h1>
-          <p className="text-gray-600 mt-2">The best wireless headphones of 2026</p>
+          <p className="text-sm uppercase tracking-[0.3em] text-cyan-300/70">
+            Curated Audio
+          </p>
+          <h1 className="text-5xl font-semibold text-slate-50 mt-2">askLuigi</h1>
+          <p className="text-slate-300 mt-3">
+            The best wireless headphones of 2026
+          </p>
         </div>
       </header>
 
@@ -19,8 +24,8 @@ export default function SitePage() {
         </div>
       </main>
 
-      <footer className="bg-white border-t border-gray-200 mt-16">
-        <div className="max-w-7xl mx-auto px-4 py-8 text-center text-gray-600 text-sm">
+      <footer className="bg-slate-950/80 border-t border-slate-800 mt-16">
+        <div className="max-w-7xl mx-auto px-4 py-8 text-center text-slate-400 text-sm">
           © 2026 askLuigi. Curated headphone recommendations.
         </div>
       </footer>

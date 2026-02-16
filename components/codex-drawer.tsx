@@ -13,6 +13,7 @@ type Status = "idle" | "running" | "done" | "error";
 export function CodexDrawer() {
   const [isOpen, setIsOpen] = useState(false);
   const [prompt, setPrompt] = useState("");
+  const [lastPrompt, setLastPrompt] = useState(""); // Keep last successful prompt for git ops
   const [plan, setPlan] = useState("");
   const [fileChanges, setFileChanges] = useState<FileChange[]>([]);
   const [status, setStatus] = useState<Status>("idle");
@@ -82,6 +83,7 @@ export function CodexDrawer() {
               setStatus("error");
             } else if (event.type === "done") {
               setStatus("done");
+              setLastPrompt(prompt); // Save prompt before clearing
               setPrompt("");
             }
           }
@@ -99,7 +101,7 @@ export function CodexDrawer() {
       const res = await fetch("/api/git/branch", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ prompt }),
+        body: JSON.stringify({ prompt: lastPrompt }),
       });
 
       const data = await res.json();
