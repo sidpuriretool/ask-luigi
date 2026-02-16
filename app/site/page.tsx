@@ -3,14 +3,14 @@ import { HeadphoneCard } from "@/components/headphone-card";
 
 export default function SitePage() {
   return (
-    <div className="min-h-screen bg-slate-950 text-slate-100 bg-[radial-gradient(circle_at_top,_rgba(34,211,238,0.12),_transparent_55%)]">
-      <header className="bg-slate-950/80 border-b border-slate-800 backdrop-blur">
+    <div className="min-h-screen bg-gradient-to-b from-yellow-50 via-amber-50 to-purple-50 text-purple-950">
+      <header className="bg-yellow-100/70 border-b border-purple-200 backdrop-blur">
         <div className="max-w-7xl mx-auto px-4 py-8">
-          <p className="text-sm uppercase tracking-[0.3em] text-cyan-300/70">
+          <p className="text-sm uppercase tracking-[0.3em] text-purple-700">
             Curated Audio
           </p>
-          <h1 className="text-5xl font-semibold text-slate-50 mt-2">askLuigi</h1>
-          <p className="text-slate-300 mt-3">
+          <h1 className="text-5xl font-semibold text-purple-950 mt-2">askLuigi</h1>
+          <p className="text-purple-800 mt-3">
             The best wireless headphones of 2026
           </p>
         </div>
@@ -24,8 +24,8 @@ export default function SitePage() {
         </div>
       </main>
 
-      <footer className="bg-slate-950/80 border-t border-slate-800 mt-16">
-        <div className="max-w-7xl mx-auto px-4 py-8 text-center text-slate-400 text-sm">
+      <footer className="bg-purple-50/80 border-t border-purple-200 mt-16">
+        <div className="max-w-7xl mx-auto px-4 py-8 text-center text-purple-700 text-sm">
           © 2026 askLuigi. Curated headphone recommendations.
         </div>
       </footer>
