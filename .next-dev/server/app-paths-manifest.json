@@ -1,6 +1,7 @@
 {
+  "/api/git/status/route": "app/api/git/status/route.js",
+  "/api/codex/run/route": "app/api/codex/run/route.js",
   "/api/git/branch/route": "app/api/git/branch/route.js",
   "/_not-found/page": "app/_not-found/page.js",
-  "/api/git/status/route": "app/api/git/status/route.js",
   "/site/page": "app/site/page.js"
 }
