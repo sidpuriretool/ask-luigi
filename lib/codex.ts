@@ -1,8 +1,8 @@
-import Codex from "@openai/codex-sdk";
+import { Codex, Thread } from "@openai/codex-sdk";
 
 // Module-level state
 let client: Codex | null = null;
-let activeThread: any | null = null;
+let activeThread: Thread | null = null;
 let isRunning = false;
 
 function getClient(): Codex {
@@ -49,39 +49,37 @@ export async function* runCodex(prompt: string): AsyncGenerator<CodexEvent> {
       });
     }
 
-    const stream = activeThread.runStreamed(prompt);
+    const streamedTurn = await activeThread.runStreamed(prompt);
 
-    for await (const event of stream) {
-      // Classify events into our simplified types.
-      // The exact event shapes come from the Codex SDK — adapt as needed
-      // based on what @openai/codex-sdk actually emits.
+    for await (const event of streamedTurn.events) {
+      // Classify events into our simplified types based on Codex SDK events
 
-      if (event.type === "reasoning" || event.type === "thinking") {
-        yield { type: "plan", content: event.content || event.text || "" };
+      if (event.type === "item.completed" && event.item) {
+        if (event.item.type === "reasoning") {
+          yield { type: "plan", content: event.item.text };
+        } else if (event.item.type === "agent_message") {
+          yield { type: "message", content: event.item.text };
+        } else if (event.item.type === "file_change") {
+          // Yield a file change event for each change in the patch
+          for (const change of event.item.changes) {
+            yield {
+              type: "file_change",
+              path: change.path,
+              status: change.kind,
+            };
+          }
+        }
       }
 
-      if (event.type === "item.completed" && event.item?.type === "file_change") {
-        yield {
-          type: "file_change",
-          path: event.item.path || event.item.file || "unknown",
-          status: event.item.status || "modified",
-        };
+      if (event.type === "error") {
+        yield { type: "error", message: event.message };
       }
-
-      if (event.type === "item.completed" && event.item?.type === "agent_message") {
-        yield { type: "message", content: event.item.content || "" };
-      }
-
-      if (event.type === "agent_message" || event.type === "message") {
-        yield { type: "message", content: event.content || event.text || "" };
-      }
-
-      // Add more event type mappings as discovered from SDK behavior
     }
 
     yield { type: "done" };
-  } catch (err: any) {
-    yield { type: "error", message: err.message || "Codex run failed" };
+  } catch (err) {
+    const message = err instanceof Error ? err.message : "Codex run failed";
+    yield { type: "error", message };
   } finally {
     isRunning = false;
   }

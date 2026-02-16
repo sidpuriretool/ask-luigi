@@ -87,8 +87,9 @@ export function CodexDrawer() {
           }
         }
       }
-    } catch (err: any) {
-      setError(err.message || "Failed to run Codex");
+    } catch (err) {
+      const message = err instanceof Error ? err.message : "Failed to run Codex";
+      setError(message);
       setStatus("error");
     }
   };
@@ -108,8 +109,9 @@ export function CodexDrawer() {
         setSavedBranch(data.branch);
         await fetchGitStatus();
       }
-    } catch (err: any) {
-      setError(err.message || "Failed to save to branch");
+    } catch (err) {
+      const message = err instanceof Error ? err.message : "Failed to save to branch";
+      setError(message);
     }
   };
 
@@ -136,8 +138,9 @@ export function CodexDrawer() {
         setSavedBranch(null);
         await fetchGitStatus();
       }
-    } catch (err: any) {
-      setError(err.message || "Failed to deploy");
+    } catch (err) {
+      const message = err instanceof Error ? err.message : "Failed to deploy";
+      setError(message);
     }
   };
 

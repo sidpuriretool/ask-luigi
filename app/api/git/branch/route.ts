@@ -11,7 +11,8 @@ export async function POST(req: NextRequest) {
 
     const result = await createBranchAndCommit(prompt);
     return NextResponse.json(result);
-  } catch (err: any) {
-    return NextResponse.json({ error: err.message || "Failed to create branch" }, { status: 500 });
+  } catch (err) {
+    const message = err instanceof Error ? err.message : "Failed to create branch";
+    return NextResponse.json({ error: message }, { status: 500 });
   }
 }

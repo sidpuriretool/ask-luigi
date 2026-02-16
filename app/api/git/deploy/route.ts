@@ -14,7 +14,8 @@ export async function POST(req: NextRequest) {
     resetThread();
     
     return NextResponse.json(result);
-  } catch (err: any) {
-    return NextResponse.json({ error: err.message || "Failed to deploy" }, { status: 500 });
+  } catch (err) {
+    const message = err instanceof Error ? err.message : "Failed to deploy";
+    return NextResponse.json({ error: message }, { status: 500 });
   }
 }

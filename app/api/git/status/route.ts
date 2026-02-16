@@ -5,7 +5,8 @@ export async function GET() {
   try {
     const status = await getStatus();
     return NextResponse.json(status);
-  } catch (err: any) {
-    return NextResponse.json({ error: err.message || "Failed to get git status" }, { status: 500 });
+  } catch (err) {
+    const message = err instanceof Error ? err.message : "Failed to get git status";
+    return NextResponse.json({ error: message }, { status: 500 });
   }
 }

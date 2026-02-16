@@ -26,7 +26,7 @@ export async function POST(req: NextRequest) {
           }
         }
         controller.close();
-      } catch (err) {
+      } catch {
         const data = `data: ${JSON.stringify({ type: "error", message: "Stream failed" })}\n\n`;
         controller.enqueue(encoder.encode(data));
         controller.close();
