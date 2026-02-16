@@ -46,6 +46,7 @@ export async function* runCodex(prompt: string): AsyncGenerator<CodexEvent> {
         workingDirectory: process.cwd(),
         skipGitRepoCheck: true,
         sandboxMode: "workspace-write",
+        model: "gpt-4o", // Use GPT-4o which should be available with your API key
       });
     }
 
