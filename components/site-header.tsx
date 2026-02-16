@@ -22,6 +22,29 @@ function NavLink({ href, label }: { href: string; label: string }) {
   );
 }
 
+export function ViewCartLink({
+  className,
+  label = "View cart",
+}: {
+  className?: string;
+  label?: string;
+}) {
+  const { itemCount } = useCart();
+
+  if (!itemCount) {
+    return null;
+  }
+
+  return (
+    <Link
+      href="/site/cart"
+      className={className}
+    >
+      {label}
+    </Link>
+  );
+}
+
 export function SiteHeader() {
   const { itemCount } = useCart();
   const { data: session, status } = useSession();

@@ -179,7 +179,15 @@ export async function* runCodex(prompt: string): AsyncGenerator<CodexEvent> {
     const guardedPrompt = buildGuardedPrompt(prompt);
     const runStartedAt = Date.now();
     let lastActivity: string | null = null;
+    let currentThinking = ""; // truncated reasoning for heartbeat
     const statusLineEmittedFor = new Set<string>();
+    const MAX_HEARTBEAT_THINKING = 55;
+
+    const truncateForHeartbeat = (text: string): string =>
+      text
+        .replace(/\s+/g, " ")
+        .trim()
+        .slice(0, MAX_HEARTBEAT_THINKING);
     yield { type: "plan", content: "Starting Codex run...\n" };
 
     // Recycle long-lived threads to keep run latency predictable.
@@ -202,28 +210,35 @@ export async function* runCodex(prompt: string): AsyncGenerator<CodexEvent> {
     });
 
     const eventIterator = streamedTurn.events[Symbol.asyncIterator]();
+    const HEARTBEAT_INTERVAL_MS = 3000;
+    let nextEventPromise = eventIterator.next();
 
     while (true) {
       const next = await Promise.race<
         | { kind: "event"; result: IteratorResult<unknown> }
         | { kind: "heartbeat" }
       >([
-        eventIterator.next().then((result) => ({ kind: "event", result })),
+        nextEventPromise.then((result) => ({ kind: "event", result })),
         new Promise<{ kind: "heartbeat" }>((resolve) =>
-          setTimeout(() => resolve({ kind: "heartbeat" }), 3000)
+          setTimeout(() => resolve({ kind: "heartbeat" }), HEARTBEAT_INTERVAL_MS)
         ),
       ]);
 
       if (next.kind === "heartbeat") {
         const elapsedSeconds = Math.floor((Date.now() - runStartedAt) / 1000);
-        const heartbeatLine = lastActivity
-          ? `Still working... (${elapsedSeconds}s). Last: ${lastActivity}\n`
-          : `Still working... (${elapsedSeconds}s)\n`;
+        const heartbeatLine = currentThinking
+          ? `${truncateForHeartbeat(currentThinking)}${currentThinking.length > MAX_HEARTBEAT_THINKING ? "…" : ""}... (${elapsedSeconds}s)\n`
+          : lastActivity
+            ? `Still working... (${elapsedSeconds}s). Last: ${lastActivity}\n`
+            : `Still working... (${elapsedSeconds}s)\n`;
         yield { type: "plan", content: heartbeatLine };
         continue;
       }
 
       if (next.result.done) break;
+
+      nextEventPromise = eventIterator.next();
+
       const event = next.result.value as {
         type: string;
         message?: string;
@@ -241,6 +256,10 @@ export async function* runCodex(prompt: string): AsyncGenerator<CodexEvent> {
         };
       };
 
+      if (event.type === "turn.completed") {
+        yield { type: "plan", content: "Finishing up…\n" };
+      }
+
       if (isCancelRequested()) {
         runAbortController.abort();
       }
@@ -249,10 +268,16 @@ export async function* runCodex(prompt: string): AsyncGenerator<CodexEvent> {
 
       if (event.type === "item.completed" && event.item) {
         if (event.item.type === "reasoning") {
-          yield { type: "plan", content: event.item.text ?? "" };
+          const text = event.item.text ?? "";
+          if (text) currentThinking = text;
+          yield { type: "plan", content: text };
         } else if (event.item.type === "agent_message") {
+          currentThinking = ""; // heartbeat should not show outdated thoughts
           yield { type: "message", content: event.item.text ?? "" };
+        } else if (event.item.type === "command_execution") {
+          lastActivity = "Command finished";
         } else if (event.item.type === "file_change") {
+          lastActivity = "Editing files";
           // Yield a file change event for each change in the patch
           for (const change of event.item.changes ?? []) {
             yield {
@@ -316,10 +341,11 @@ export async function* runCodex(prompt: string): AsyncGenerator<CodexEvent> {
           yield { type: "plan", content: line };
         }
 
-        // Reasoning and agent_message (streamed text)
+        // Reasoning and agent_message (streamed text) — surface during item.updated too
         const content = item.text ?? item.content ?? "";
         if (content) {
           if (item.type === "reasoning") {
+            currentThinking = content; // for heartbeat: show what Codex is thinking
             yield { type: "plan", content };
           } else if (item.type === "agent_message") {
             yield { type: "message", content };
@@ -330,6 +356,12 @@ export async function* runCodex(prompt: string): AsyncGenerator<CodexEvent> {
       if (event.type === "error") {
         yield { type: "error", message: event.message ?? "Codex stream error" };
       }
+    }
+
+    const finalResponse = (streamedTurn as { finalResponse?: string })
+      .finalResponse;
+    if (finalResponse) {
+      yield { type: "message", content: finalResponse };
     }
 
     const restoredFiles = restoreGuardedFiles(guardedSnapshots);

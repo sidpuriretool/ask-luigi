@@ -4,6 +4,10 @@ export interface Headphone {
   brand: string;
   price: number;
   originalPrice?: number;
+  priceHistory?: {
+    date: string;
+    price: number;
+  }[];
   description: string;
   longDescription: string;
   features: string[];
@@ -19,6 +23,14 @@ export const headphones: Headphone[] = [
     brand: "Sony",
     price: 348,
     originalPrice: 399,
+    priceHistory: [
+      { date: "2025-09-01", price: 399 },
+      { date: "2025-10-01", price: 379 },
+      { date: "2025-11-01", price: 349 },
+      { date: "2025-12-01", price: 369 },
+      { date: "2026-01-01", price: 359 },
+      { date: "2026-02-01", price: 348 },
+    ],
     description: "Our top pick for most people with standout ANC and a full-day battery.",
     longDescription:
       "Sony's flagship noise canceling over-ears use a multi-mic system and dual processors to tune out distractions and sharpen call quality, with high-resolution audio support for detailed listening.",
@@ -90,6 +102,14 @@ export const headphones: Headphone[] = [
     name: "WH-CH720N",
     brand: "Sony",
     price: 149,
+    priceHistory: [
+      { date: "2025-09-01", price: 199 },
+      { date: "2025-10-01", price: 189 },
+      { date: "2025-11-01", price: 149 },
+      { date: "2025-12-01", price: 169 },
+      { date: "2026-01-01", price: 159 },
+      { date: "2026-02-01", price: 149 },
+    ],
     description: "Budget-friendly pick with surprisingly good ANC.",
     longDescription:
       "Sony's lightest ANC headband uses the Integrated Processor V1 and Dual Noise Sensor tech for stronger noise reduction, with DSEE sound enhancement, multipoint Bluetooth, and an all-day comfortable fit.",
