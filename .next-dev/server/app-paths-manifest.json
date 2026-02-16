@@ -1,8 +1,0 @@
-{
-  "/favicon.ico/route": "app/favicon.ico/route.js",
-  "/api/git/status/route": "app/api/git/status/route.js",
-  "/api/git/branch/route": "app/api/git/branch/route.js",
-  "/api/codex/run/route": "app/api/codex/run/route.js",
-  "/site/page": "app/site/page.js",
-  "/page": "app/page.js"
-}
