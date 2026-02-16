@@ -12,17 +12,6 @@ export interface Headphone {
 
 export const headphones: Headphone[] = [
   {
-    id: 1,
-    name: "WH-1000XM5",
-    brand: "Sony",
-    price: 348,
-    originalPrice: 399,
-    description: "Best overall noise-cancelling headphone with industry-leading ANC and 30-hour battery.",
-    imageUrl: "/headphones/sony-xm5.jpg",
-    rating: 4.8,
-    pickNumber: 1,
-  },
-  {
     id: 2,
     name: "QuietComfort Ultra",
     brand: "Bose",
@@ -31,6 +20,17 @@ export const headphones: Headphone[] = [
     description: "Premium comfort and spatial audio with exceptional noise cancellation.",
     imageUrl: "/headphones/bose-qc-ultra.jpg",
     rating: 4.7,
+    pickNumber: 1,
+  },
+  {
+    id: 1,
+    name: "WH-1000XM5",
+    brand: "Sony",
+    price: 348,
+    originalPrice: 399,
+    description: "Best overall noise-cancelling headphone with industry-leading ANC and 30-hour battery.",
+    imageUrl: "/headphones/sony-xm5.jpg",
+    rating: 4.8,
     pickNumber: 2,
   },
   {
