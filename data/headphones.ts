@@ -5,6 +5,7 @@ export interface Headphone {
   price: number;
   originalPrice?: number;
   description: string;
+  longDescription: string;
   features: string[];
   imageUrl: string;
   rating: number;
@@ -19,6 +20,8 @@ export const headphones: Headphone[] = [
     price: 348,
     originalPrice: 399,
     description: "Our top pick for most people with standout ANC and a full-day battery.",
+    longDescription:
+      "Sony's flagship noise canceling over-ears use a multi-mic system and dual processors to tune out distractions and sharpen call quality, with high-resolution audio support for detailed listening.",
     features: [
       "Excellent active noise cancellation in crowded spaces.",
       "Comfortable fit for all-day work and travel.",
@@ -35,6 +38,8 @@ export const headphones: Headphone[] = [
     price: 379,
     originalPrice: 429,
     description: "Plush fit and strong noise reduction, especially for long flights.",
+    longDescription:
+      "Bose's most advanced QuietComfort option pairs adjustable active noise cancelling with an around-ear cushioned fit and USB-C charging for daily listening.",
     features: [
       "Soft ear cushions that stay comfortable for long sessions.",
       "Class-leading wind and cabin noise suppression.",
@@ -51,6 +56,8 @@ export const headphones: Headphone[] = [
     price: 479,
     originalPrice: 549,
     description: "Best for Apple users who want frictionless switching and rich detail.",
+    longDescription:
+      "Apple's over-ear headphones deliver high-fidelity sound with Active Noise Cancellation and Personalized Spatial Audio, wrapped in a comfort-focused design with USB-C charging.",
     features: [
       "Seamless multi-device pairing in the Apple ecosystem.",
       "Spacious soundstage with adaptive EQ.",
@@ -67,6 +74,8 @@ export const headphones: Headphone[] = [
     price: 299,
     originalPrice: 379,
     description: "Big, balanced sound with marathon battery life.",
+    longDescription:
+      "Sennheiser's Momentum 4 Wireless pairs adaptive noise cancellation and transparency mode with Sennheiser Signature Sound, customizable sound controls, and up to 60 hours of battery life.",
     features: [
       "Up to 60-hour battery life on a single charge.",
       "Detailed sound signature that works across genres.",
@@ -82,6 +91,8 @@ export const headphones: Headphone[] = [
     brand: "Sony",
     price: 149,
     description: "Budget-friendly pick with surprisingly good ANC.",
+    longDescription:
+      "Sony's lightest ANC headband uses the Integrated Processor V1 and Dual Noise Sensor tech for stronger noise reduction, with DSEE sound enhancement, multipoint Bluetooth, and an all-day comfortable fit.",
     features: [
       "Lightweight frame that feels easy for daily commutes.",
       "Effective ANC for the price tier.",
@@ -97,6 +108,8 @@ export const headphones: Headphone[] = [
     brand: "Bowers & Wilkins",
     price: 399,
     description: "Polished build with a warm, detailed tuning.",
+    longDescription:
+      "Bowers & Wilkins' Px7 S2e is a re-tuned evolution with 24-bit DSP, custom 40mm drivers, hybrid noise cancellation, and premium materials for all-day comfort.",
     features: [
       "Rich, musical tuning with premium detail retrieval.",
       "Refined design with durable materials.",
@@ -112,6 +125,8 @@ export const headphones: Headphone[] = [
     brand: "Bang & Olufsen",
     price: 449,
     description: "Luxury materials with a refined, relaxed sound.",
+    longDescription:
+      "Bang & Olufsen's Beoplay H9i leans into luxury with anodized aluminum and leather materials plus advanced active noise cancellation for immersive travel listening.",
     features: [
       "Elegant industrial design with real metal and leather.",
       "Smooth and fatigue-free sound for long listening.",
@@ -128,6 +143,8 @@ export const headphones: Headphone[] = [
     price: 199,
     originalPrice: 299,
     description: "Best for calls with clear mics and smart ambient modes.",
+    longDescription:
+      "Jabra's Elite 85h uses SmartSound adaptive audio with Smart ANC, eight microphones for clearer calls, and rain-resistant durability paired with the Sound+ app.",
     features: [
       "Clear voice pickup in noisy environments.",
       "SmartSound profiles adapt to surroundings automatically.",
@@ -143,6 +160,8 @@ export const headphones: Headphone[] = [
     brand: "Soundcore",
     price: 99,
     description: "Best value with long battery life and capable ANC.",
+    longDescription:
+      "Soundcore's Space One pairs adaptive noise cancelling with 40mm drivers, adjustable transparency, and long battery life for affordable everyday use.",
     features: [
       "Excellent value-to-performance ratio under $100.",
       "Big battery life for week-long casual use.",
@@ -158,6 +177,8 @@ export const headphones: Headphone[] = [
     brand: "Focal",
     price: 699,
     description: "Audiophile splurge with a built-in DAC and premium detail.",
+    longDescription:
+      "Focal's Bathys focuses on high-fidelity wireless listening with active noise cancelling modes, premium comfort, and fast-charging battery life over 30 hours.",
     features: [
       "High-resolution wired DAC mode for critical listening.",
       "Luxurious comfort and premium craftsmanship.",

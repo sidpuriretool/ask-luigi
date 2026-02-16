@@ -61,6 +61,15 @@ export default async function ProductPage({
 
             <div className="rounded-2xl border border-slate-200 bg-slate-50 p-4">
               <p className="text-xs font-semibold uppercase tracking-[0.25em] text-slate-500">
+                Overview
+              </p>
+              <p className="mt-3 text-sm leading-relaxed text-slate-700">
+                {headphone.longDescription}
+              </p>
+            </div>
+
+            <div className="rounded-2xl border border-slate-200 bg-slate-50 p-4">
+              <p className="text-xs font-semibold uppercase tracking-[0.25em] text-slate-500">
                 Why we picked it
               </p>
               <ul className="mt-3 space-y-2 text-sm text-slate-700">
