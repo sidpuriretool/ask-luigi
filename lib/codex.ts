@@ -16,8 +16,10 @@ function getClient(): Codex {
       fs.mkdirSync(codexHome, { recursive: true });
     }
     process.env.CODEX_HOME = codexHome;
-    // Use same pattern as html-campaign: new Codex() with no config
-    client = new Codex();
+    // Pass API key explicitly so Codex SDK can authenticate
+    client = new Codex({
+      apiKey: process.env.OPENAI_API_KEY,
+    });
   }
   return client;
 }
