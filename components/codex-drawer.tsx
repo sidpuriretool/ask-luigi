@@ -1,6 +1,7 @@
   "use client";
 
 import { useState, useEffect, useRef } from "react";
+import { useSession } from "next-auth/react";
 import { X, Loader2 } from "lucide-react";
 
 type FileChange = {
