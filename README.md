@@ -1,107 +1,72 @@
 # askLuigi
 
-A single-page headphones eCommerce site with a built-in Codex agent that lets you edit the live site through natural language prompts.
+A single-page headphones eCommerce site with a built-in Codex drawer for local page editing.
 
 ## Features
 
-- 🎧 **Headphones Site**: Clean, Wirecutter-style product page with top 10 headphone picks
-- 🤖 **Codex Integration**: Built-in AI agent drawer for live code editing
-- 🔄 **Real-time Preview**: See changes immediately with Next.js hot reload
-- 🌿 **Git Integration**: Branch, commit, and deploy changes with one click
-- ⚡ **SSE Streaming**: Watch the agent plan and execute changes in real-time
+- Headphones page at `/site` with static top picks
+- Floating Codex drawer for prompt-based edits
+- SSE streaming for plan text and file changes
+- Local preview with Next.js hot reload
 
 ## Quick Start
 
-1. **Install dependencies**:
+1. Install dependencies:
    ```bash
    npm install
    ```
-
-2. **Set up your API key**:
+2. Add env to `.env.local`:
    ```bash
-   # Copy .env.example to .env.local
-   cp .env.example .env.local
-
-   # Edit .env.local and add your OpenAI API key
    OPENAI_API_KEY=your-key-here
+   NEXTAUTH_SECRET=any-random-string
+   NEXTAUTH_URL=http://localhost:3000
+   DEMO_EMAIL=demo@example.com
+   DEMO_PASSWORD=demo
    ```
-
-3. **Start the dev server**:
+3. Start dev server:
    ```bash
    npm run dev
    ```
+4. Open [http://localhost:3000/site](http://localhost:3000/site)
 
-4. **Open the site**: Visit [http://localhost:3000](http://localhost:3000)
+## Programmatic Codex
 
-## How to Use
-
-1. Navigate to `/site` to see the headphones page
-2. Click the **🔧 Codex** button in the bottom-right corner
-3. Type a prompt like:
-   - "Make the hero headline bigger and change accent color to purple"
-   - "Add a discount badge to the first product"
-   - "Change the grid to 2 columns on desktop"
-4. Click **Run** and watch the agent work
-5. Refresh the page to see your changes
-6. Click **Save to Branch** to create a git branch with your changes
-7. Click **Deploy to Main** to merge and deploy
+Codex is used programmatically via the **Codex SDK** in `lib/codex.ts` and exposed by the API routes. See [docs/CODEX.md](docs/CODEX.md) for where and how the SDK is used and the request/stream flow.
 
 ## Project Structure
 
 ```
 app/
-  site/page.tsx              # The headphones website (what Codex edits)
-  api/codex/run/             # SSE streaming endpoint
-  api/git/{status,branch,deploy}/  # Git operations
+  site/page.tsx            # Headphones website
+  page.tsx                 # Redirect to /site
+  layout.tsx               # Root layout with CodexDrawer
+  api/codex/run/           # SSE endpoint for Codex runs
+  api/codex/cancel/        # Cancel active run
+  api/orders/              # Create order (auth required)
+  api/auth/[...nextauth]/  # NextAuth
 
 components/
-  codex-drawer.tsx           # The AI agent UI
-  headphone-card.tsx         # Product card
+  codex-drawer.tsx         # Drawer UI (prompt, plan, file changes)
+  headphone-card.tsx       # Product card
+  session-provider.tsx     # NextAuth SessionProvider
 
 lib/
-  codex.ts                   # Codex SDK wrapper
-  git.ts                     # Git operations via simple-git
+  codex.ts                 # Codex SDK wrapper + streamed run helper
+  db.ts                    # SQLite orders DB
+  auth.ts                  # NextAuth config
+  utils.ts                 # Tailwind helper
 
 data/
-  headphones.ts              # Static product data
-
-AGENTS.md                    # Instructions for the Codex agent
+  headphones.ts            # Static product data
+  ask-luigi.db             # SQLite DB (created at runtime)
 ```
-
-## Tech Stack
-
-- **Next.js 15** - App Router + React 19
-- **TypeScript** - Type-safe code
-- **Tailwind CSS** - Utility-first styling
-- **Codex SDK** - AI agent integration
-- **simple-git** - Git operations
 
 ## Commands
 
 ```bash
-npm run dev      # Start development server
-npm run build    # Build for production
-npm run start    # Start production server
-npm run lint     # Run ESLint
+npm run dev
+npm run build
+npm run start
+npm run lint
+npm test
 ```
-
-## How It Works
-
-1. **Codex Agent**: The `lib/codex.ts` module manages a persistent thread that maintains context across multiple prompts
-2. **SSE Streaming**: The `/api/codex/run` endpoint streams events (plan text, file changes) as they happen
-3. **File Editing**: Codex modifies files directly in `process.cwd()` with `workspace-write` sandbox mode
-4. **Git Safety**: Git operations are blocked while Codex is running to prevent conflicts
-5. **Thread Persistence**: The same thread is reused for follow-up prompts, then reset after deploy
-
-## Notes
-
-- This is a **local dev tool** - no authentication or database
-- Codex operates directly on your filesystem
-- Always review changes before deploying to main
-- The agent knows what to edit via `AGENTS.md`
-
-## Learn More
-
-- [Codex Documentation](https://openai.com/codex)
-- [Next.js Documentation](https://nextjs.org/docs)
-- [Tailwind CSS](https://tailwindcss.com)

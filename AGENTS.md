@@ -1,17 +1,24 @@
 # askLuigi
 
-A single-page headphones eCommerce site built with Next.js 15, TypeScript, and Tailwind CSS.
+A storefront-style headphones eCommerce site built with Next.js 15, TypeScript, and Tailwind CSS.
 
 ## What to edit
-- `app/site/page.tsx` — the main page layout and structure
+- `app/site/page.tsx` — storefront homepage layout
+- `app/site/product/[id]/page.tsx` — product detail page
+- `app/site/cart/page.tsx` — cart page layout and UI copy
+- `app/site/checkout/page.tsx` — checkout page layout and UI copy
 - `components/headphone-card.tsx` — individual product card component
-- `data/headphones.ts` — product data (names, prices, descriptions)
+- `components/site-header.tsx` — storefront header/nav
+- `components/site-footer.tsx` — storefront footer
+- `data/headphones.ts` — product data (names, prices, descriptions, features)
 - `app/globals.css` — global Tailwind styles if needed
 
 ## Do not edit
-- `lib/codex.ts`, `lib/git.ts` — infrastructure, not the website
+- `lib/codex.ts` — infrastructure, not the website
 - `app/api/` — API routes, not the website
 - `components/codex-drawer.tsx` — the agent UI, not the website
+- `components/cart-provider.tsx` — cart state logic
+- `components/add-to-cart-button.tsx` — add-to-cart action logic
 - `app/layout.tsx` — root layout, not the website
 - `app/page.tsx` — redirect page, not the website
 

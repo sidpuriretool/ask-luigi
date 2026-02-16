@@ -1,6 +1,8 @@
 import type { Metadata } from "next";
 import "./globals.css";
 import { CodexDrawer } from "@/components/codex-drawer";
+import { CartProvider } from "@/components/cart-provider";
+import { AskLuigiSessionProvider } from "@/components/session-provider";
 
 export const metadata: Metadata = {
   title: "askLuigi",
@@ -13,10 +15,14 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html lang="en">
-      <body className="antialiased">
-        {children}
-        <CodexDrawer />
+    <html lang="en" suppressHydrationWarning>
+      <body className="antialiased" suppressHydrationWarning>
+        <AskLuigiSessionProvider>
+          <CartProvider>
+            {children}
+            <CodexDrawer />
+          </CartProvider>
+        </AskLuigiSessionProvider>
       </body>
     </html>
   );

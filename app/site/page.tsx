@@ -1,74 +1,79 @@
-import { headphones } from "@/data/headphones";
+import Link from "next/link";
 import { HeadphoneCard } from "@/components/headphone-card";
+import { SiteFooter } from "@/components/site-footer";
+import { SiteHeader } from "@/components/site-header";
+import { headphones } from "@/data/headphones";
 
 export default function SitePage() {
-  return (
-    <div className="min-h-screen bg-zinc-50 text-zinc-900">
-      <header className="border-b border-black/10 bg-white/80 backdrop-blur">
-        <div className="max-w-7xl mx-auto px-4 py-10">
-          <div className="flex items-center gap-3 text-xs uppercase tracking-[0.45em] text-zinc-500">
-            <span className="h-[1px] w-10 bg-red-600" />
-            Curated Audio
-          </div>
-          <div className="mt-4 grid gap-6 lg:grid-cols-[1.2fr_1fr] lg:items-end">
-            <div>
-              <h1 className="text-5xl md:text-6xl font-semibold tracking-tight text-zinc-950">
-                askLuigi
-              </h1>
-              <p className="text-lg text-zinc-600 mt-3 max-w-xl">
-                Quiet, comfortable, and confident. A Bose-inspired selection of
-                wireless headphones that put calm at the center.
-              </p>
-            </div>
-            <div className="rounded-3xl border border-black/10 bg-white p-6 shadow-[0_25px_60px_-45px_rgba(0,0,0,0.55)]">
-              <p className="text-xs uppercase tracking-[0.3em] text-zinc-500">
-                Focus Areas
-              </p>
-              <div className="mt-4 grid grid-cols-2 gap-3 text-sm text-zinc-700">
-                <div className="rounded-2xl border border-black/10 p-3">
-                  Noise cancellation
-                </div>
-                <div className="rounded-2xl border border-black/10 p-3">
-                  All-day comfort
-                </div>
-                <div className="rounded-2xl border border-black/10 p-3">
-                  Warm, balanced sound
-                </div>
-                <div className="rounded-2xl border border-black/10 p-3">
-                  Clear call quality
-                </div>
-              </div>
-            </div>
-          </div>
-        </div>
-      </header>
+  const topPick = headphones[0];
 
-      <main className="max-w-7xl mx-auto px-4 py-12 lg:py-16">
-        <div className="flex items-center justify-between gap-6">
+  return (
+    <div className="min-h-screen bg-[#f8f8f4] text-slate-900">
+      <SiteHeader />
+
+      <main className="mx-auto w-full max-w-7xl px-4 py-10">
+        <section className="grid gap-6 rounded-3xl border border-slate-200 bg-white p-6 md:grid-cols-[1.2fr_0.8fr] md:p-8">
           <div>
-            <p className="text-xs uppercase tracking-[0.35em] text-zinc-500">
-              2026 Picks
+            <p className="text-xs font-semibold uppercase tracking-[0.35em] text-slate-500">
+              Top 10 headphones
             </p>
-            <h2 className="text-3xl md:text-4xl font-semibold text-zinc-950 mt-2">
-              Quiet confidence, ranked.
-            </h2>
+            <h1 className="mt-3 text-4xl font-semibold tracking-tight text-slate-950 md:text-5xl">
+              A Shopify-style storefront for tested headphone picks.
+            </h1>
+            <p className="mt-4 max-w-2xl text-base text-slate-700">
+              Browse editor-ranked models, open a product detail page, and build a cart before using
+              the mock checkout flow.
+            </p>
+
+            <div className="mt-6 flex flex-wrap items-center gap-3">
+              <Link
+                href={`/site/product/${topPick.id}`}
+                className="rounded-full bg-slate-900 px-5 py-2.5 text-sm font-semibold text-white transition hover:bg-slate-800"
+              >
+                Shop top pick
+              </Link>
+              <Link
+                href="/site/cart"
+                className="rounded-full border border-slate-300 px-5 py-2.5 text-sm font-semibold text-slate-900 transition hover:border-slate-900"
+              >
+                View cart
+              </Link>
+            </div>
           </div>
-          <button className="hidden md:inline-flex items-center gap-2 rounded-full border border-black/10 bg-white px-5 py-2 text-sm font-medium text-zinc-800 shadow-sm">
-            Compare all models
-          </button>
-        </div>
-        <div className="mt-10 grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-          {headphones.map((headphone) => (
-            <HeadphoneCard key={headphone.id} headphone={headphone} />
-          ))}
-        </div>
+
+          <div className="rounded-2xl border border-slate-200 bg-slate-50 p-5">
+            <p className="text-xs font-semibold uppercase tracking-[0.25em] text-slate-500">Featured pick</p>
+            <h2 className="mt-2 text-2xl font-semibold text-slate-950">{topPick.name}</h2>
+            <p className="mt-2 text-sm text-slate-600">{topPick.description}</p>
+            <p className="mt-3 text-2xl font-semibold text-slate-950">${topPick.price}</p>
+            <Link
+              href={`/site/product/${topPick.id}`}
+              className="mt-4 inline-flex rounded-full bg-emerald-600 px-4 py-2 text-sm font-semibold text-white transition hover:bg-emerald-700"
+            >
+              See details
+            </Link>
+          </div>
+        </section>
+
+        <section className="mt-10">
+          <div className="flex items-end justify-between gap-4 border-b border-slate-200 pb-4">
+            <h2 className="text-2xl font-semibold text-slate-950">Shop all recommendations</h2>
+            <p className="text-xs font-semibold uppercase tracking-[0.25em] text-slate-500">10 models</p>
+          </div>
+
+          <div className="mt-6 grid grid-cols-1 gap-6 md:grid-cols-2 xl:grid-cols-3">
+            {headphones.map((headphone, index) => (
+              <HeadphoneCard
+                key={headphone.id}
+                headphone={headphone}
+                featured={index === 0}
+              />
+            ))}
+          </div>
+        </section>
       </main>
 
-      <footer className="border-t border-black/10 bg-white mt-16">
-        <div className="max-w-7xl mx-auto px-4 py-8 text-center text-sm text-zinc-500">
-          © 2026 askLuigi. Curated headphone recommendations.
-        </div>
-      </footer>
+      <SiteFooter />
     </div>
   );
 }
