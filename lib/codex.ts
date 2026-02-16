@@ -1,4 +1,5 @@
 import { Codex, Thread } from "@openai/codex-sdk";
+import path from "path";
 
 // Module-level state
 let client: Codex | null = null;
@@ -7,7 +8,11 @@ let isRunning = false;
 
 function getClient(): Codex {
   if (!client) {
-    client = new Codex({ apiKey: process.env.OPENAI_API_KEY });
+    // Set CODEX_HOME like html-campaign does
+    const codexHome = path.join(process.cwd(), ".codex");
+    process.env.CODEX_HOME = codexHome;
+    // Use same pattern as html-campaign: new Codex() with no config
+    client = new Codex();
   }
   return client;
 }
@@ -42,11 +47,10 @@ export async function* runCodex(prompt: string): AsyncGenerator<CodexEvent> {
 
     // Start a new thread or reuse existing one
     if (!activeThread) {
-      activeThread = await codex.startThread({
+      activeThread = codex.startThread({
         workingDirectory: process.cwd(),
         skipGitRepoCheck: true,
         sandboxMode: "workspace-write",
-        model: "gpt-4o", // Use GPT-4o which should be available with your API key
       });
     }
 
