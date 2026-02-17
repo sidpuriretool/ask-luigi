@@ -2,7 +2,8 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { signOut, useSession } from "next-auth/react";
+import { signOut } from "next-auth/react";
+import { useSession } from "next-auth/react";
 import { useCart } from "@/components/cart-provider";
 
 function NavLink({ href, label }: { href: string; label: string }) {
@@ -64,9 +65,6 @@ export function SiteHeader() {
         <nav className="flex items-center gap-1">
           <NavLink href="/site" label="Shop" />
           <NavLink href="/site/cart" label="Cart" />
-          {status === "authenticated" && (
-            <NavLink href="/site/orders" label="Orders" />
-          )}
           <Link
             href="/site/cart"
             className="ml-2 flex items-center gap-2 rounded-full border border-slate-300 px-4 py-2 text-sm font-semibold text-slate-900 transition hover:border-slate-900"

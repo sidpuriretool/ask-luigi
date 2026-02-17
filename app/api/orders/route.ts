@@ -8,6 +8,16 @@ type OrderItem = {
   quantity: number;
 };
 
+type OrderRow = {
+  id: number;
+  email: string;
+  name: string;
+  address: string;
+  items_json: string;
+  subtotal: number;
+  created_at: string;
+};
+
 function isValidItems(items: unknown): items is OrderItem[] {
   if (!Array.isArray(items) || items.length === 0) return false;
   return items.every(
@@ -44,7 +54,7 @@ export async function GET() {
       .all(session.user.email);
 
     return NextResponse.json({
-      orders: orders.map((order: any) => ({
+      orders: (orders as OrderRow[]).map((order) => ({
         ...order,
         items: JSON.parse(order.items_json),
       })),
