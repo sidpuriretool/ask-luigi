@@ -1,4 +1,4 @@
-import { Codex, Thread } from "@openai/codex-sdk";
+import { Codex, Thread, type ThreadEvent } from "@openai/codex-sdk";
 import path from "path";
 import fs from "fs";
 
@@ -9,19 +9,20 @@ let isRunning = false;
 let activeRunAbortController: AbortController | null = null;
 let threadRunCount = 0;
 const MAX_RUNS_PER_THREAD = 5;
+const CANCEL_POLL_INTERVAL_MS = 500;
 const CODEX_META_DIR = path.join(process.cwd(), ".codex");
 const CANCEL_REQUEST_PATH = path.join(CODEX_META_DIR, "cancel-request");
-const EDITABLE_FILES = [
-  "app/site/page.tsx",
-  "app/site/product/[id]/page.tsx",
-  "app/site/cart/page.tsx",
-  "app/site/checkout/page.tsx",
-  "components/headphone-card.tsx",
-  "components/site-header.tsx",
-  "components/site-footer.tsx",
-  "data/headphones.ts",
-  "app/globals.css",
-  "public/headphones",
+const EDITABLE_FILE_MAP = [
+  { path: "app/site/page.tsx", description: "storefront homepage with product grid." },
+  { path: "app/site/product/[id]/page.tsx", description: "product detail page." },
+  { path: "app/site/cart/page.tsx", description: "cart UI and quantity controls." },
+  { path: "app/site/checkout/page.tsx", description: "mock checkout form and success state." },
+  { path: "components/headphone-card.tsx", description: "reusable product card used in grids." },
+  { path: "components/site-header.tsx", description: "shared top navigation and cart badge." },
+  { path: "components/site-footer.tsx", description: "shared footer." },
+  { path: "data/headphones.ts", description: "product catalog data." },
+  { path: "app/globals.css", description: "global theme styles." },
+  { path: "public/headphones", description: "product images." },
 ] as const;
 const GUARDED_FILES = [
   "app/page.tsx",
@@ -81,23 +82,15 @@ function writeCancelRequest() {
 }
 
 function buildGuardedPrompt(userPrompt: string): string {
+  const fileMapLines = EDITABLE_FILE_MAP.map((f) => `- ${f.path}: ${f.description}`);
   return [
     "You are editing the askLuigi website.",
     "",
     "Storefront file map:",
-    "- app/site/page.tsx: storefront homepage with product grid.",
-    "- app/site/product/[id]/page.tsx: product detail page.",
-    "- app/site/cart/page.tsx: cart UI and quantity controls.",
-    "- app/site/checkout/page.tsx: mock checkout form and success state.",
-    "- components/headphone-card.tsx: reusable product card used in grids.",
-    "- components/site-header.tsx: shared top navigation and cart badge.",
-    "- components/site-footer.tsx: shared footer.",
-    "- data/headphones.ts: product catalog data.",
-    "- app/globals.css: global theme styles.",
-    "- public/headphones: product images.",
+    ...fileMapLines,
     "",
     "Only edit these paths:",
-    ...EDITABLE_FILES.map((file) => `- ${file}`),
+    ...EDITABLE_FILE_MAP.map((f) => `- ${f.path}`),
     "Never edit, move, delete, or rename any other files.",
     "If the request requires touching other files, explain that limitation instead of editing.",
     "",
@@ -106,6 +99,11 @@ function buildGuardedPrompt(userPrompt: string): string {
   ].join("\n");
 }
 
+/**
+ * Snapshots guarded files so we can restore them after a run.
+ * Only files that exist at snapshot time are restored; if Codex creates a new
+ * file at a guarded path during the run, we do not delete it.
+ */
 function snapshotGuardedFiles(): FileSnapshot[] {
   return GUARDED_FILES.map((relativePath) => {
     const absolutePath = path.join(process.cwd(), relativePath);
@@ -141,6 +139,19 @@ function restoreGuardedFiles(snapshots: FileSnapshot[]): string[] {
   return restored;
 }
 
+function* yieldRestoreEvents(snapshots: FileSnapshot[]): Generator<CodexEvent> {
+  const restored = restoreGuardedFiles(snapshots);
+  for (const relativePath of restored) {
+    yield { type: "file_change", path: relativePath, status: "restored" };
+  }
+  if (restored.length > 0) {
+    yield {
+      type: "message",
+      content: "Protected routing/infrastructure files were restored automatically.",
+    };
+  }
+}
+
 // Event types the API route will stream to the client
 export type CodexEvent =
   | { type: "plan"; content: string }
@@ -172,7 +183,7 @@ export async function* runCodex(prompt: string): AsyncGenerator<CodexEvent> {
     if (isCancelRequested()) {
       runAbortController.abort();
     }
-  }, 500);
+  }, CANCEL_POLL_INTERVAL_MS);
 
   try {
     const codex = getClient();
@@ -239,22 +250,7 @@ export async function* runCodex(prompt: string): AsyncGenerator<CodexEvent> {
 
       nextEventPromise = eventIterator.next();
 
-      const event = next.result.value as {
-        type: string;
-        message?: string;
-        item?: {
-          id?: string;
-          type?: string;
-          text?: string;
-          content?: string;
-          changes?: { path: string; kind: string }[];
-          query?: string;
-          command?: string;
-          tool?: string;
-          server?: string;
-          items?: { text: string; completed: boolean }[];
-        };
-      };
+      const event = next.result.value as ThreadEvent;
 
       if (event.type === "turn.completed") {
         yield { type: "plan", content: "Finishing up…\n" };
@@ -342,7 +338,10 @@ export async function* runCodex(prompt: string): AsyncGenerator<CodexEvent> {
         }
 
         // Reasoning and agent_message (streamed text) — surface during item.updated too
-        const content = item.text ?? item.content ?? "";
+        const content =
+          item.type === "reasoning" || item.type === "agent_message"
+            ? item.text ?? ""
+            : "";
         if (content) {
           if (item.type === "reasoning") {
             currentThinking = content; // for heartbeat: show what Codex is thinking
@@ -355,6 +354,7 @@ export async function* runCodex(prompt: string): AsyncGenerator<CodexEvent> {
 
       if (event.type === "error") {
         yield { type: "error", message: event.message ?? "Codex stream error" };
+        break;
       }
     }
 
@@ -364,31 +364,15 @@ export async function* runCodex(prompt: string): AsyncGenerator<CodexEvent> {
       yield { type: "message", content: finalResponse };
     }
 
-    const restoredFiles = restoreGuardedFiles(guardedSnapshots);
-    if (restoredFiles.length > 0) {
-      for (const restoredFile of restoredFiles) {
-        yield { type: "file_change", path: restoredFile, status: "restored" };
-      }
-      yield {
-        type: "message",
-        content:
-          "Protected routing/infrastructure files were restored automatically.",
-      };
+    for (const event of yieldRestoreEvents(guardedSnapshots)) {
+      yield event;
     }
 
     threadRunCount += 1;
     yield { type: "done" };
   } catch (err) {
-    const restoredFiles = restoreGuardedFiles(guardedSnapshots);
-    if (restoredFiles.length > 0) {
-      for (const restoredFile of restoredFiles) {
-        yield { type: "file_change", path: restoredFile, status: "restored" };
-      }
-      yield {
-        type: "message",
-        content:
-          "Protected routing/infrastructure files were restored automatically.",
-      };
+    for (const event of yieldRestoreEvents(guardedSnapshots)) {
+      yield event;
     }
 
     if (runAbortController.signal.aborted) {

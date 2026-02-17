@@ -15,14 +15,15 @@ A single-page headphones eCommerce site with a built-in Codex drawer for local p
    ```bash
    npm install
    ```
-2. Add env to `.env.local`:
+2. Add env to `.env.local` (see `.env.example`):
    ```bash
    OPENAI_API_KEY=your-key-here
    NEXTAUTH_SECRET=any-random-string
    NEXTAUTH_URL=http://localhost:3000
-   DEMO_EMAIL=demo@example.com
-   DEMO_PASSWORD=demo
+   GOOGLE_CLIENT_ID=your-google-client-id
+   GOOGLE_CLIENT_SECRET=your-google-client-secret
    ```
+   For "Sign in with Google" to work, create an OAuth 2.0 Web client in [Google Cloud Console](https://console.cloud.google.com/) (APIs & Services → Credentials) and add this **Authorized redirect URI**: `http://localhost:3000/api/auth/callback/google` (use your production origin in production).
 3. Start dev server:
    ```bash
    npm run dev
